@@ -12,8 +12,10 @@ function draw() {
         for (let x = 0; x < w; x++) {
             const s = g.get(x, y)
             if (s) {
-                const hue = (gen % 30)/30
-                fill(hsl(hue, .5, .54))
+                const age = min(gen - s, 30)
+                const light = .5 + age/60
+                const hue = (s % 30)/30
+                fill(hsl(hue, .5, light))
                 rect(x * W + BORDER, y * W + BORDER, CW, CW)
             }
         }
