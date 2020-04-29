@@ -1,9 +1,13 @@
-const PERIOD = 1
+const PERIOD = .5
 const CELL_WIDTH = 16
 
 let gen = 0
 let w, h
 const field = []
+
+function generation() {
+    return gen
+}
 
 function fieldWidth() {
     return w
@@ -80,8 +84,27 @@ function next() {
     }
 }
 
+function poke(x, y, action) {
+    if (!action) return
+    const lx = floor(x/CELL_WIDTH)
+    const ly = floor(y/CELL_WIDTH)
+    const cell = field[lx][ly]
+    if (!cell) return
+
+    switch(action) {
+        case 1:
+            if (!cell.state) cell.state = gen
+            break
+        case 2:
+            cell.state = 0
+            break
+    }
+}
+
 let timer = 0
 function evo(dt) {
+    if (env.paused) return
+
     timer += dt
     if (timer > PERIOD) {
         next()
