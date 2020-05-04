@@ -87,8 +87,12 @@ function evo(dt) {
 function draw() {
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            if (grid[x][y].state) {
-                fill(.55, .5, .5)
+            const s = getState(x, y)
+            if (s) {
+                const age = min(generation - s, 120)
+                const light = .5 + age/240
+                const hue = (s % 40)/40
+                fill(hsl(hue, .5, light))
                 rect(x*W+B, y*W+B, W-2*B, W-2*B)
             }
         }
