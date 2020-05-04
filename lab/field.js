@@ -2,7 +2,7 @@
 const W = 16
 const B = 1
 
-const PERIOD = 1
+const PERIOD = .5
 
 let w, h
 const grid = []
@@ -45,7 +45,7 @@ function neighbours(x, y) {
     return n
 }
 
-let generation = 0
+let generation = 1
 function nextGeneration() {
     generation ++
     for (let y = 0; y < h; y++) {
@@ -75,6 +75,8 @@ function nextGeneration() {
 
 let timer = 0
 function evo(dt) {
+    if (this.paused) return
+
     timer += dt
     if (timer >= PERIOD) {
         timer = 0
@@ -91,4 +93,12 @@ function draw() {
             }
         }
     }
+}
+
+function poke(gx, gy, action) {
+    const x = floor(gx/W)
+    const y = floor(gy/W)
+
+    if (action === 2) grid[x][y].state = 0
+    else if (action === 1 && !getState(x, y)) grid[x][y].state = generation
 }
