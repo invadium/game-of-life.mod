@@ -1,8 +1,7 @@
-
 const W = 16
 const B = 1
 
-const PERIOD = .5
+let PERIOD = .5
 
 let w, h
 const grid = []
@@ -20,9 +19,23 @@ function init() {
         }
     }
 
-    grid[15][15].state = 1
-    grid[15][16].state = 1
-    grid[15][17].state = 1
+    // "Acorn" config
+    const cx = floor(w * .6)
+    const cy = floor(h/2)
+
+    grid[cx-2][cy-1].state = 1
+    grid[cx-2][cy+1].state = 1
+    grid[cx-3][cy+1].state = 1
+
+    grid[cx][cy].state = 1
+
+    grid[cx+1][cy+1].state = 1
+    grid[cx+2][cy+1].state = 1
+    grid[cx+3][cy+1].state = 1
+}
+
+function adjustPeriod(factor) {
+    PERIOD *= factor
 }
 
 function getState(x, y) {
@@ -85,17 +98,28 @@ function evo(dt) {
 }
 
 function draw() {
+    let n = 0
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
             const s = getState(x, y)
             if (s) {
+                n++
                 const age = min(generation - s, 120)
                 const light = .5 + age/240
                 const hue = (s % 40)/40
-                fill(hsl(hue, .5, light))
+                fill(hsl(hue, .6, light))
                 rect(x*W+B, y*W+B, W-2*B, W-2*B)
             }
         }
+    }
+
+    if (this.showStat) {
+        alignLeft()
+        baseTop()
+        fill(.46, 1, .4)
+        font('32px moon')
+        text('Gen. ' + generation, 10, 10)
+        text('Pop. ' + n, 10, 45)
     }
 }
 
