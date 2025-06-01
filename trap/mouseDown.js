@@ -1,5 +1,4 @@
 function mouseDown(e) {
-
     let action = 0
     switch(e.buttons) {
         case 1:

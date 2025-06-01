@@ -34,11 +34,15 @@ function init() {
     grid[cx+3][cy+1].state = 1
 }
 
-function adjustPeriod(factor) {
-    PERIOD *= factor
+function setPeriod(period) {
+    PERIOD = period
 }
 
-function getState(x, y) {
+function adjustPeriod(factor) {
+    PERIOD = clamp(PERIOD * factor, .001, 8)
+}
+
+function isAlive(x, y) {
     if (x < 0) x = w - 1
     else if (x >= w) x = 0
     if (y < 0) y = h - 1
@@ -52,38 +56,46 @@ function neighbours(x, y) {
     for (let ny = y - 1; ny <= y + 1; ny++) {
         for (let nx = x - 1; nx <= x + 1; nx++) {
             if (x === nx && y === ny) continue
-            if (getState(nx, ny)) n++
+            if (isAlive(nx, ny)) n++
         }
     }
     return n
 }
 
-let generation = 1
-function nextGeneration() {
-    generation ++
+function markForChange() {
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const s = getState(x, y)
+            const alive = isAlive(x, y)
             const n = neighbours(x, y)
 
-            if (s && (n < 2 || n > 3)) {
+            if (alive && (n < 2 || n > 3)) {
                 grid[x][y].next = true
-            } else if (!s && n === 3) {
+            } else if (!alive && n === 3) {
                 grid[x][y].next = true
             } else {
                 grid[x][y].next = false
             }
         }
     }
+}
+
+function applyChanges() {
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            if (getState(x, y) && grid[x][y].next) {
+            if (isAlive(x, y) && grid[x][y].next) {
                 grid[x][y].state = 0
-            } else if (!getState(x, y) && grid[x][y].next) {
+            } else if (!isAlive(x, y) && grid[x][y].next) {
                 grid[x][y].state = generation
             }
         }
     }
+}
+
+let generation = 1
+function nextGeneration() {
+    generation ++
+    markForChange()
+    applyChanges()
 }
 
 let timer = 0
@@ -97,11 +109,26 @@ function evo(dt) {
     }
 }
 
+function drawStat(N) {
+    alignLeft()
+    baseTop()
+    fill(.46, 1, .4)
+    font('32px moon')
+
+    let by = 10
+    const stepY = 35
+    text('Gen. ' + generation, 10, by)
+    by += stepY
+    text('Pop. ' + N, 10, by)
+    by += stepY
+    text('Evo Speed: x' + round(1/PERIOD * 10)/10, 10, by)
+}
+
 function draw() {
     let n = 0
     for (let y = 0; y < h; y++) {
         for (let x = 0; x < w; x++) {
-            const s = getState(x, y)
+            const s = isAlive(x, y)
             if (s) {
                 n++
                 const age = min(generation - s, 120)
@@ -113,14 +140,7 @@ function draw() {
         }
     }
 
-    if (this.showStat) {
-        alignLeft()
-        baseTop()
-        fill(.46, 1, .4)
-        font('32px moon')
-        text('Gen. ' + generation, 10, 10)
-        text('Pop. ' + n, 10, 45)
-    }
+    if (this.showStat) this.drawStat(n)
 }
 
 function poke(gx, gy, action) {
@@ -128,5 +148,5 @@ function poke(gx, gy, action) {
     const y = floor(gy/W)
 
     if (action === 2) grid[x][y].state = 0
-    else if (action === 1 && !getState(x, y)) grid[x][y].state = generation
+    else if (action === 1 && !isAlive(x, y)) grid[x][y].state = generation
 }
